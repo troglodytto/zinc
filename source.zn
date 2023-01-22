@@ -14,13 +14,11 @@
     (something (arg, arg, arg))
     (else2342klasd (arg, arg, arg))
     
-    (+ ("\n", "Multiple-strings", 'single-quote-string'))
-    (!= (f, 4))
-    (set (X, 12))
+    (+ "\n" "Multiple-strings" 'single-quote-string')
+    (!= f 4)
+    (set X 12)
     
-    (= (g, 12))
-    
-    (set (array { "arrays", "are", "defined", "like", "this" }))
+    (set array { "arrays", "are", "defined", "like", "this" })
     
     (print x)
     

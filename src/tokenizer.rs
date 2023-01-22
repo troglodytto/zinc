@@ -1,22 +1,21 @@
-use crate::token::{Keyword, Literal, Operator, Token};
+use crate::{keyword::Keyword, literal::Literal, operator::Operator, token::Token};
 use std::{
     io::{Error, ErrorKind, Result},
     iter::Peekable,
+    process,
     str::Chars,
 };
 
 pub struct Tokenizer;
 
 impl Tokenizer {
-    pub fn tokenize(text: String) -> Vec<Token> {
+    #[must_use]
+    pub fn tokenize(text: &str) -> Vec<Token> {
         let mut tokens = Vec::new();
         let mut chars = text.chars().peekable();
 
         loop {
-            let current_char = match chars.next() {
-                Some(c) => c,
-                None => break,
-            };
+            let Some(current_char) = chars.next() else { break };
 
             let token = match (current_char, chars.peek()) {
                 ('(', _) => Token::LParen,
@@ -51,11 +50,18 @@ impl Tokenizer {
                 ('<', _) => Token::Op(Operator::LessThan),
                 ('=', _) => Token::Op(Operator::Equal),
                 (',', _) => Token::Comma,
-                (' ' | '\n' | '\t', _) => Token::Whitespace {
-                    value: current_char,
-                },
+                // (' ' | '\n' | '\t', _) => Token::Whitespace {
+                //     value: current_char,
+                // },
+                (' ' | '\n' | '\t', _) => {
+                    continue;
+                }
+
                 (unknown, _) => Tokenizer::parse_non_trivial_token(unknown, &mut chars)
-                    .expect(format!("Invalid Charater {unknown}").as_str()),
+                    .unwrap_or_else(|_| {
+                        println!("Invalid Charater {unknown}");
+                        process::exit(-1);
+                    }),
             };
 
             tokens.push(token);
@@ -67,20 +73,20 @@ impl Tokenizer {
     fn parse_non_trivial_token(unknown: char, chars: &mut Peekable<Chars>) -> Result<Token> {
         match unknown {
             '"' | '\'' => {
-                let string_content = Tokenizer::parse_word(vec!['"', '\''], chars);
+                let string_content = Tokenizer::parse_word(&['"', '\''], chars);
                 chars.next();
                 Ok(Token::Literal(Literal::String(string_content)))
             }
 
             ';' => {
-                let string_content = Tokenizer::parse_word(vec!['\n'], chars);
+                let string_content = Tokenizer::parse_word(&['\n'], chars);
                 Ok(Token::Comment(string_content))
             }
 
             'a'..='z' | 'A'..='Z' | '_' => {
                 let mut identifier = String::from(unknown);
                 let word = Tokenizer::parse_word(
-                    vec![
+                    &[
                         ' ', '(', ')', '\n', '\t', ',', '-', '+', '=', '/', '*', '%', '.', '{',
                         '}', ';',
                     ],
@@ -89,17 +95,17 @@ impl Tokenizer {
 
                 identifier += &word;
 
-                if let Some(keyword) = Tokenizer::parse_keyword(&identifier) {
-                    return Ok(keyword);
+                if let Some(keyword) = Tokenizer::parse_keyword(identifier.as_str()) {
+                    Ok(keyword)
+                } else {
+                    Ok(Token::Identifier(identifier))
                 }
-
-                return Ok(Token::Identifier(identifier));
             }
 
             '0'..='9' => {
                 let mut number = String::from(unknown);
                 let word = Tokenizer::parse_word(
-                    vec![
+                    &[
                         ' ', '(', ')', '\n', '\t', ',', '-', '+', '=', '/', '*', '%', '.', '{',
                         '}', ';',
                     ],
@@ -118,8 +124,8 @@ impl Tokenizer {
         }
     }
 
-    fn parse_keyword(content: &String) -> Option<Token> {
-        match content.as_str() {
+    fn parse_keyword(content: &str) -> Option<Token> {
+        match content {
             "ret" => Some(Token::Keyword(Keyword::Return)),
             "if" => Some(Token::Keyword(Keyword::If)),
             "else" => Some(Token::Keyword(Keyword::Else)),
@@ -130,7 +136,7 @@ impl Tokenizer {
         }
     }
 
-    fn parse_word(constraints: Vec<char>, chars: &mut Peekable<Chars>) -> String {
+    fn parse_word(constraints: &[char], chars: &mut Peekable<Chars>) -> String {
         let mut result = String::new();
 
         while let Some(character) = chars.peek() {
