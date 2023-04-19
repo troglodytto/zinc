@@ -50,12 +50,9 @@ impl Tokenizer {
                 ('<', _) => Token::Op(Operator::LessThan),
                 ('=', _) => Token::Op(Operator::Equal),
                 (',', _) => Token::Comma,
-                // (' ' | '\n' | '\t', _) => Token::Whitespace {
-                //     value: current_char,
-                // },
-                (' ' | '\n' | '\t', _) => {
-                    continue;
-                }
+                (' ' | '\n' | '\t', _) => Token::Whitespace {
+                    value: current_char,
+                },
 
                 (unknown, _) => Tokenizer::parse_non_trivial_token(unknown, &mut chars)
                     .unwrap_or_else(|_| {

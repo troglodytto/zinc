@@ -12,7 +12,7 @@
 (func main (arg arg) (
     ; This is a comment
     (something (arg, arg, arg))
-    (else2342klasd (arg, arg, arg))
+    (else (arg, arg, arg))
     
     (+ "\n" "Multiple-strings" 'single-quote-string')
     (!= f 4)
