@@ -1,0 +1,45 @@
+func hello() -> int {
+  let message = "Hello, world!";
+
+  if(true) {
+    const update = 13.5 * 32;
+
+    // always have to interpolate message. Cannot directly print
+    print("{update}");
+  }
+
+  object[value][name][while];
+
+  object . value;
+
+  loop: while(true  ) {
+    // Loops with labels
+  }
+
+  anotherLoop: for (let i = 0; i < 10; i += 1) {
+    // For Loops with labels
+  }
+
+  let expression = {
+    // Expression Block
+  };
+
+  calling();
+
+  // Strings are always interpolated. Escape if you want to use curly brackets
+  print("Hello, world! {message} \{escaped\}");
+
+  hof(lambda(x, y) {
+    statement
+  });
+
+  lambda(x, y)();
+}
+
+// Objects are just hash maps
+const something = Object({
+    key: "Value",
+    anotherKey: "AnotherValue",
+    numeric: 12,
+    boolean: true,
+})
